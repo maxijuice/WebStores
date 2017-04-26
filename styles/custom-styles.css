@@ -1,3 +1,31 @@
 .container {
     margin-top: 60px;
 }
+
+.paging {
+    display: inline-block;
+    border: 1px solid rgba(179, 179, 179, 0.78);
+    border-radius: 5px;
+}
+
+.page {
+    padding: 5px 10px;
+    display: inline-block;
+    color: #eb6864;
+    text-decoration: none;
+    font-family: Verdana, sans-serif;
+}
+
+.current-page {
+    background-color: rgba(179, 179, 179, 0.1);
+    color: #793a39;
+}
+
+.page:hover, .page:active {
+    background-color: rgba(179, 179, 179, 0.1);
+    text-decoration: none;
+}
+
+.page + .page {
+    border-left: 1px solid rgba(179, 179, 179, 0.78);
+}

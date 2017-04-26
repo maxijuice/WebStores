@@ -64,7 +64,7 @@ var storesInWeb =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 3);
+/******/ 	return __webpack_require__(__webpack_require__.s = 4);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -318,10 +318,252 @@ var substr = 'ab'.substr(-1) === 'b'
     }
 ;
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(12)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(13)))
 
 /***/ }),
 /* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/**
+ * Created by maksim.bulakhau on 3/27/2017.
+ */
+/*
+ Array Library object for operating on arrays
+ */
+
+/*
+It would be great to add static keyword, which could be applied on classes
+In ES5 that would look like:
+
+var StaticClass = function() {};
+StaticClass.prototype = Object.create(null);
+StaticClass.method1 = function() { / native code / };
+*/
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var ArrayLibrary = function () {
+    function ArrayLibrary() {
+        _classCallCheck(this, ArrayLibrary);
+    }
+
+    _createClass(ArrayLibrary, null, [{
+        key: "take",
+        value: function take(array, n) {
+            return array.slice(0, n);
+        }
+    }, {
+        key: "skip",
+        value: function skip(array, n) {
+            return array.slice(n);
+        }
+    }, {
+        key: "map",
+        value: function map(array, callback) {
+            var newArray = [];
+
+            var _iteratorNormalCompletion = true;
+            var _didIteratorError = false;
+            var _iteratorError = undefined;
+
+            try {
+                for (var _iterator = array[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                    var item = _step.value;
+
+                    if (typeof item !== "undefined") {
+                        newArray.push(callback(item));
+                    }
+                }
+            } catch (err) {
+                _didIteratorError = true;
+                _iteratorError = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion && _iterator.return) {
+                        _iterator.return();
+                    }
+                } finally {
+                    if (_didIteratorError) {
+                        throw _iteratorError;
+                    }
+                }
+            }
+
+            return newArray;
+        }
+    }, {
+        key: "reduce",
+        value: function reduce(array, callback) {
+            var value = 0;
+
+            if ((arguments.length <= 2 ? 0 : arguments.length - 2) > 0) {
+                value = arguments.length <= 2 ? undefined : arguments[2];
+            } else {
+                value = array[0];
+                array = array.slice(1);
+            }
+
+            var _iteratorNormalCompletion2 = true;
+            var _didIteratorError2 = false;
+            var _iteratorError2 = undefined;
+
+            try {
+                for (var _iterator2 = array[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                    var item = _step2.value;
+
+                    if (typeof item !== "undefined") {
+                        value = callback(value, item);
+                    }
+                }
+            } catch (err) {
+                _didIteratorError2 = true;
+                _iteratorError2 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                        _iterator2.return();
+                    }
+                } finally {
+                    if (_didIteratorError2) {
+                        throw _iteratorError2;
+                    }
+                }
+            }
+
+            return value;
+        }
+    }, {
+        key: "foreach",
+        value: function foreach(array, callback) {
+            var _iteratorNormalCompletion3 = true;
+            var _didIteratorError3 = false;
+            var _iteratorError3 = undefined;
+
+            try {
+                for (var _iterator3 = array[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+                    var item = _step3.value;
+
+                    if (typeof item !== "undefined") {
+                        callback(item, array.indexOf(item), array);
+                    }
+                }
+            } catch (err) {
+                _didIteratorError3 = true;
+                _iteratorError3 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion3 && _iterator3.return) {
+                        _iterator3.return();
+                    }
+                } finally {
+                    if (_didIteratorError3) {
+                        throw _iteratorError3;
+                    }
+                }
+            }
+        }
+    }, {
+        key: "filter",
+        value: function filter(array, callback) {
+            var newArray = [];
+
+            var _iteratorNormalCompletion4 = true;
+            var _didIteratorError4 = false;
+            var _iteratorError4 = undefined;
+
+            try {
+                for (var _iterator4 = array[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+                    var item = _step4.value;
+
+                    if (callback(item, array.indexOf(item), array)) {
+                        newArray.push(item);
+                    }
+                }
+            } catch (err) {
+                _didIteratorError4 = true;
+                _iteratorError4 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion4 && _iterator4.return) {
+                        _iterator4.return();
+                    }
+                } finally {
+                    if (_didIteratorError4) {
+                        throw _iteratorError4;
+                    }
+                }
+            }
+
+            return newArray;
+        }
+    }, {
+        key: "chain",
+        value: function chain(initArray) {
+            var _this = this;
+
+            var wrapChain = function wrapChain(callback) {
+                callback = callback.bind(null, initArray);
+                return function () {
+                    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+                        args[_key] = arguments[_key];
+                    }
+
+                    return _this.chain(callback.apply(null, args));
+                };
+            };
+
+            return {
+                take: wrapChain(this.take),
+                skip: wrapChain(this.skip),
+                map: wrapChain(this.map),
+                foreach: wrapChain(this.foreach),
+                filter: wrapChain(this.filter),
+                value: function value() {
+                    return initArray;
+                }
+            };
+        }
+    }, {
+        key: "sum",
+        value: function sum(array, start, end) {
+            if (!this.memo) {
+                this.memo = {};
+            }
+
+            function summarize(array, start, end, memo) {
+                var property = array + ", " + start + ", " + end;
+
+                if (property in memo) {
+                    return memo[property];
+                } else {
+                    var resultSum = 0;
+                    for (var i = start; i <= end; i++) {
+                        resultSum += array[i];
+                    }
+                    memo[property] = resultSum;
+                    return resultSum;
+                }
+            }
+
+            return summarize(array, start, end, this.memo);
+        }
+    }]);
+
+    return ArrayLibrary;
+}();
+
+exports.default = ArrayLibrary;
+
+/***/ }),
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -333,13 +575,13 @@ Object.defineProperty(exports, "__esModule", {
 /**
  * Created by maksim.bulakhau on 4/19/2017.
  */
-var fs = __webpack_require__(5);
-var cities = __webpack_require__(7);
-var countries = __webpack_require__(8);
-var stores = __webpack_require__(9);
-var streets = __webpack_require__(10);
-var zips = __webpack_require__(11);
-var brands = __webpack_require__(6);
+var fs = __webpack_require__(6);
+var cities = __webpack_require__(8);
+var countries = __webpack_require__(9);
+var stores = __webpack_require__(10);
+var streets = __webpack_require__(11);
+var zips = __webpack_require__(12);
+var brands = __webpack_require__(7);
 
 (function initFs(done) {
     fs.writeFile("cities.json", JSON.stringify(cities)).then(function () {
@@ -432,7 +674,7 @@ var storesService = function () {
 exports.storesService = storesService;
 
 /***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -441,17 +683,23 @@ exports.storesService = storesService;
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.getSelectedValue = exports.updateCountriesDropdown = exports.updateCitiesDropdown = exports.initStoresTable = undefined;
+exports.getSelectedValue = exports.updateCountriesDropdown = exports.updateCitiesDropdown = exports.submitStoresSearch = undefined;
 
-var _storesService = __webpack_require__(2);
+var _storesService = __webpack_require__(3);
 
+var _arraylib = __webpack_require__(2);
+
+var _arraylib2 = _interopRequireDefault(_arraylib);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * Created by maksim.bulakhau on 4/21/2017.
+ */
 (function initPageDropdowns() {
     initDropdown("selectCountry", _storesService.storesService.countries);
     initDropdown("selectCity", _storesService.storesService.cities);
-})(); /**
-       * Created by maksim.bulakhau on 4/21/2017.
-       */
-
+})();
 
 function clearDropdown(dropdownId) {
     var dropdown = document.getElementById(dropdownId);
@@ -527,14 +775,7 @@ function updateCountriesDropdown(cityName) {
     });
 }
 
-function initStoresTable() {
-
-    // Delete previous table.
-    var div = document.getElementById("resultTableWrapper");
-    while (div.firstChild) {
-        div.removeChild(div.firstChild);
-    }
-
+function getDataSet() {
     var selectedCity = getSelectedValue("selectCity");
     var stores = [];
     if (selectedCity == "All") {
@@ -545,14 +786,30 @@ function initStoresTable() {
         stores = _storesService.storesService.getStoresByCity(selectedCity);
     }
 
+    return stores;
+}
+
+var dataSet;
+var itemsPerPage = 10;
+
+function initStoresTable(data, page) {
+
+    // Delete previous table.
+    var div = document.getElementById("resultTableWrapper");
+    while (div.firstChild) {
+        div.removeChild(div.firstChild);
+    }
+
     // Create table with proper bootstrap classes.
     var table = document.createElement("table");
     table.classList.add("table");
     table.classList.add("table-striped");
     table.classList.add("table-hover");
 
-    stores.then(function (stores) {
+    data.then(function (stores) {
         if (stores.length > 0) {
+
+            var data = _arraylib2.default.chain(stores).skip((page - 1) * itemsPerPage).take(itemsPerPage).value();
 
             // Table head init.
             var propNames = Object.getOwnPropertyNames(stores[0]);
@@ -566,7 +823,7 @@ function initStoresTable() {
             table.appendChild(headRow);
 
             // Table data init.
-            stores.forEach(function (store) {
+            data.forEach(function (store) {
                 var row = document.createElement("tr");
                 propNames.forEach(function (property) {
                     var cell = document.createElement("td");
@@ -582,16 +839,51 @@ function initStoresTable() {
             table.appendChild(errorMsg);
         }
         div.appendChild(table);
+
+        // Enable paging if result set is too big
+        if (stores.length > itemsPerPage) {
+            initPaging((stores.length / itemsPerPage).toFixed(), page);
+        }
     });
 }
 
-exports.initStoresTable = initStoresTable;
+function submitStoresSearch() {
+    dataSet = getDataSet();
+    initStoresTable(dataSet, 1);
+}
+
+function goToPage(pageNum) {
+    initStoresTable(dataSet, pageNum);
+}
+
+function initPaging(pagesAmount, currentPage) {
+    var div = document.getElementById("resultTableWrapper");
+    var paging = document.createElement("div");
+    paging.classList.add("paging");
+
+    for (var i = 1; i <= pagesAmount; i++) {
+        var page = document.createElement("a");
+        page.setAttribute("href", "#");
+        page.innerHTML = i;
+        page.classList.add("page");
+        page.addEventListener("click", goToPage.bind(null, i));
+        if (i == currentPage) {
+            page.classList.add("current-page");
+        }
+
+        paging.appendChild(page);
+    }
+
+    div.appendChild(paging);
+}
+
+exports.submitStoresSearch = submitStoresSearch;
 exports.updateCitiesDropdown = updateCitiesDropdown;
 exports.updateCountriesDropdown = updateCountriesDropdown;
 exports.getSelectedValue = getSelectedValue;
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -763,7 +1055,7 @@ function rmdir(fullPath) {
 ;
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -799,7 +1091,7 @@ function _defaults(obj, defaults) {
 function _interopRequireDefault(obj) {
     return obj && obj.__esModule ? obj : { 'default': obj };
 }
-var _core = __webpack_require__(4);
+var _core = __webpack_require__(5);
 var _directory_entry = __webpack_require__(0);
 var _directory_entry2 = _interopRequireDefault(_directory_entry);
 _directory_entry2['default'].prototype.readFile = function (callback) {
@@ -812,7 +1104,7 @@ _defaults(exports, _interopRequireWildcard(_core));
 exports.DirectoryEntry = _directory_entry2['default'];
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, exports) {
 
 module.exports = [
@@ -888,7 +1180,7 @@ module.exports = [
 ];
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, exports) {
 
 module.exports = [
@@ -991,7 +1283,7 @@ module.exports = [
 ];
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports) {
 
 module.exports = [
@@ -1970,7 +2262,7 @@ module.exports = [
 ];
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports) {
 
 module.exports = [
@@ -2252,7 +2544,7 @@ module.exports = [
 ];
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports) {
 
 module.exports = [
@@ -2499,7 +2791,7 @@ module.exports = [
 ];
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports) {
 
 module.exports = [
@@ -2602,7 +2894,7 @@ module.exports = [
 ];
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports) {
 
 // shim for using process in browser

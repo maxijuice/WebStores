@@ -2,7 +2,7 @@
  * Created by maksim.bulakhau on 4/21/2017.
  */
 import {storesService} from "./stores-service";
-
+import ArrayLibrary from "./arraylib.es6";
 
 (function initPageDropdowns() {
     initDropdown("selectCountry", storesService.countries);
@@ -61,14 +61,7 @@ function updateCountriesDropdown(cityName) {
     });
 }
 
-function initStoresTable() {
-
-    // Delete previous table.
-    let div = document.getElementById("resultTableWrapper");
-    while(div.firstChild) {
-        div.removeChild(div.firstChild);
-    }
-
+function getDataSet() {
     let selectedCity = getSelectedValue("selectCity");
     let stores = [];
     if (selectedCity == "All") {
@@ -79,14 +72,30 @@ function initStoresTable() {
         stores = storesService.getStoresByCity(selectedCity);
     }
 
+    return stores;
+}
+
+var dataSet;
+var itemsPerPage = 10;
+
+function initStoresTable(data, page) {
+
+    // Delete previous table.
+    let div = document.getElementById("resultTableWrapper");
+    while(div.firstChild) {
+        div.removeChild(div.firstChild);
+    }
+
     // Create table with proper bootstrap classes.
     let table = document.createElement("table");
     table.classList.add("table");
     table.classList.add("table-striped");
     table.classList.add("table-hover");
 
-    stores.then(stores => {
+    data.then(stores => {
         if (stores.length > 0) {
+
+            var data  = ArrayLibrary.chain(stores).skip((page - 1) * itemsPerPage).take(itemsPerPage).value();
 
             // Table head init.
             let propNames = Object.getOwnPropertyNames(stores[0]);
@@ -100,7 +109,7 @@ function initStoresTable() {
             table.appendChild(headRow);
 
             // Table data init.
-            stores.forEach(store => {
+            data.forEach(store => {
                 let row = document.createElement("tr");
                 propNames.forEach(property => {
                     let cell = document.createElement("td");
@@ -116,7 +125,42 @@ function initStoresTable() {
             table.appendChild(errorMsg);
         }
         div.appendChild(table);
+
+        // Enable paging if result set is too big
+        if (stores.length > itemsPerPage){
+            initPaging((stores.length / itemsPerPage).toFixed(), page);
+        }
     });
 }
 
-export { initStoresTable, updateCitiesDropdown, updateCountriesDropdown, getSelectedValue };
+function submitStoresSearch() {
+    dataSet = getDataSet();
+    initStoresTable(dataSet, 1);
+}
+
+function goToPage(pageNum) {
+    initStoresTable(dataSet, pageNum);
+}
+
+function initPaging(pagesAmount, currentPage) {
+    let div = document.getElementById("resultTableWrapper");
+    let paging = document.createElement("div");
+    paging.classList.add("paging");
+
+    for (let i = 1; i <= pagesAmount; i++) {
+        let page = document.createElement("a");
+        page.setAttribute("href", "#");
+        page.innerHTML = i;
+        page.classList.add("page");
+        page.addEventListener("click", goToPage.bind(null, i));
+        if (i == currentPage) {
+            page.classList.add("current-page");
+        }
+
+        paging.appendChild(page);
+    }
+
+    div.appendChild(paging);
+}
+
+export { submitStoresSearch, updateCitiesDropdown, updateCountriesDropdown, getSelectedValue };
