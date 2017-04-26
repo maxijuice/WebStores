@@ -1,4 +1,4 @@
-var storesInWeb =
+var webStores =
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -64,11 +64,255 @@ var storesInWeb =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 4);
+/******/ 	return __webpack_require__(__webpack_require__.s = 7);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+/**
+ * Created by maksim.bulakhau on 4/26/2017.
+ */
+// HTML ids, classes and string consts
+var optionAll = "All";
+var citySelectId = "selectCity";
+var countrySelectId = "selectCountry";
+var pagingClass = "paging";
+var pagingUnitClass = "page";
+var currentPagingUnitClass = "current-page";
+var tableContainerId = "resultTableWrapper";
+
+var itemsPerPage = 10;
+
+// Require all json files
+var cities = __webpack_require__(11);
+var countries = __webpack_require__(12);
+var stores = __webpack_require__(13);
+var streets = __webpack_require__(14);
+var zips = __webpack_require__(15);
+var brands = __webpack_require__(10);
+var fs = __webpack_require__(9);
+
+// IndexedDB keys for jsons
+var citiesKey = "cities.json";
+var countriesKey = "countries.json";
+var storesKey = "stores.json";
+var streetsKey = "streets.json";
+var zipsKey = "zips.json";
+var brandsKey = "brands.json";
+
+exports.itemsPerPage = itemsPerPage;
+exports.fs = fs;
+exports.cities = cities;
+exports.countries = countries;
+exports.stores = stores;
+exports.streets = streets;
+exports.zips = zips;
+exports.brands = brands;
+exports.optionAll = optionAll;
+exports.citySelectId = citySelectId;
+exports.countrySelectId = countrySelectId;
+exports.citiesKey = citiesKey;
+exports.countriesKey = countriesKey;
+exports.storesKey = storesKey;
+exports.streetsKey = streetsKey;
+exports.zipsKey = zipsKey;
+exports.brandsKey = brandsKey;
+exports.pagingClass = pagingClass;
+exports.pagingUnitClass = pagingUnitClass;
+exports.tableContainerId = tableContainerId;
+exports.currentPagingUnitClass = currentPagingUnitClass;
+
+/***/ }),
+/* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.initDropdown = exports.updateCountriesDropdown = exports.updateCitiesDropdown = undefined;
+
+var _consts = __webpack_require__(0);
+
+var _stores = __webpack_require__(2);
+
+/**
+ * Created by maksim.bulakhau on 4/26/2017.
+ */
+function initDropdown(dropdownId, dataPromise) {
+    var dropdown = document.getElementById(dropdownId);
+
+    dropdown.add(new Option(_consts.optionAll));
+    return dataPromise.then(function (dataItems) {
+        dataItems.forEach(function (item) {
+            dropdown.add(new Option(item.name, item.name));
+        });
+    });
+}
+
+function clearDropdown(dropdownId) {
+    var dropdown = document.getElementById(dropdownId);
+
+    while (dropdown.options.length > 0) {
+        dropdown.remove(0);
+    }
+}
+
+function setSelectedValue(dropdownId, value) {
+    var dropdown = document.getElementById(dropdownId);
+
+    var _iteratorNormalCompletion = true;
+    var _didIteratorError = false;
+    var _iteratorError = undefined;
+
+    try {
+        for (var _iterator = dropdown.options[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+            var item = _step.value;
+
+            if (item.value == value) {
+                item.selected = true;
+                break;
+            }
+        }
+    } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+    } finally {
+        try {
+            if (!_iteratorNormalCompletion && _iterator.return) {
+                _iterator.return();
+            }
+        } finally {
+            if (_didIteratorError) {
+                throw _iteratorError;
+            }
+        }
+    }
+}
+
+function updateCitiesDropdown(countryName) {
+    clearDropdown(_consts.citySelectId);
+    var selector = countryName == _consts.optionAll ? _stores.service.cities : _stores.service.getCitiesByCountry(countryName);
+
+    return initDropdown(_consts.citySelectId, selector);
+}
+
+function updateCountriesDropdown(cityName) {
+    if (document.getElementById(_consts.countrySelectId).value != _consts.optionAll) {
+        return;
+    }
+
+    var country = _stores.service.getCountryByCity(cityName);
+
+    country.then(function (countries) {
+        var countryName = countries[0].name;
+        setSelectedValue(_consts.countrySelectId, countryName);
+        updateCitiesDropdown(countryName).then(function (done) {
+            return setSelectedValue(_consts.citySelectId, cityName);
+        });
+    });
+}
+
+exports.updateCitiesDropdown = updateCitiesDropdown;
+exports.updateCountriesDropdown = updateCountriesDropdown;
+exports.initDropdown = initDropdown;
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.service = undefined;
+
+var _consts = __webpack_require__(0);
+
+var service = function () {
+
+    function resolveJson(path, onDone, filters) {
+        return new Promise(function resolver(resolve, reject) {
+            _consts.fs.readString(path).then(function (data) {
+                return resolve(onDone(filters, JSON.parse(data)));
+            }, function (error) {
+                return reject(error);
+            });
+        });
+    }
+
+    // This method requires to be pre-binded with first two arguments,
+    // each for property names of filter and readed json correspondinly
+    function getByProp(filterProp, sourceItemProp, filters, sourceArray) {
+        var resultArray = [];
+
+        filters.forEach(function (filter) {
+            var temp = sourceArray.filter(function (sourceItem) {
+                return filter[filterProp] == sourceItem[sourceItemProp];
+            });
+            temp.forEach(function (filtered) {
+                return resultArray.push(filtered);
+            });
+        });
+
+        return resultArray;
+    }
+
+    // This method works for occasions, when filter is a string already
+    function getByName(filter, sourceArray) {
+        return sourceArray.filter(function (sourceItem) {
+            return sourceItem.name.search(filter) != -1;
+        });
+    }
+
+    // Public methods for different purposes, which are wrappers on resolveJson calls
+    function getStoresByCity(cityName) {
+        return resolveJson(_consts.citiesKey, getByName, cityName).then(resolveJson.bind(null, _consts.zipsKey, getByProp.bind(null, "name", "city"))).then(resolveJson.bind(null, _consts.storesKey, getByProp.bind(null, "zip", "zip")));
+    }
+
+    function getStoresByCountry(countryName) {
+        return resolveJson(_consts.countriesKey, getByName, countryName).then(resolveJson.bind(null, _consts.citiesKey, getByProp.bind(null, "name", "country"))).then(resolveJson.bind(null, _consts.zipsKey, getByProp.bind(null, "name", "city"))).then(resolveJson.bind(null, _consts.storesKey, getByProp.bind(null, "zip", "zip")));
+    }
+
+    function getCitiesByCountry(countryName) {
+        return resolveJson(_consts.countriesKey, getByName, countryName).then(resolveJson.bind(null, _consts.citiesKey, getByProp.bind(null, "name", "country")));
+    }
+
+    function getCountryByCity(cityName) {
+        return resolveJson(_consts.citiesKey, getByName, cityName).then(resolveJson.bind(null, _consts.countriesKey, getByProp.bind(null, "country", "name")));
+    }
+
+    function getTable(path) {
+        return resolveJson(path, getByName, "");
+    }
+
+    return {
+        cities: getTable(_consts.citiesKey),
+        countries: getTable(_consts.countriesKey),
+        getCitiesByCountry: getCitiesByCountry,
+        getCountryByCity: getCountryByCity,
+        getStoresByCity: getStoresByCity,
+        getStoresByCountry: getStoresByCountry
+    };
+}(); /**
+      * Created by maksim.bulakhau on 4/19/2017.
+      */
+exports.service = service;
+
+/***/ }),
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -78,7 +322,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 function _interopRequireDefault(obj) {
     return obj && obj.__esModule ? obj : { 'default': obj };
 }
-var _path = __webpack_require__(1);
+var _path = __webpack_require__(4);
 var _path2 = _interopRequireDefault(_path);
 function DirectoryEntry(fullPath, type) {
     this.path = fullPath;
@@ -90,7 +334,7 @@ exports['default'] = DirectoryEntry;
 module.exports = exports['default'];
 
 /***/ }),
-/* 1 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(process) {// Copyright Joyent, Inc. and other Node contributors.
@@ -318,10 +562,10 @@ var substr = 'ab'.substr(-1) === 'b'
     }
 ;
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(13)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(16)))
 
 /***/ }),
-/* 2 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -333,13 +577,13 @@ var substr = 'ab'.substr(-1) === 'b'
  */
 
 /*
-It would be great to add static keyword, which could be applied on classes
-In ES5 that would look like:
+ It would be great to add static keyword, which could be applied on classes
+ In ES5 that would look like:
 
-var StaticClass = function() {};
-StaticClass.prototype = Object.create(null);
-StaticClass.method1 = function() { / native code / };
-*/
+ var StaticClass = function() {};
+ StaticClass.prototype = Object.create(null);
+ StaticClass.method1 = function() { / native code / };
+ */
 
 
 Object.defineProperty(exports, "__esModule", {
@@ -563,7 +807,7 @@ var ArrayLibrary = function () {
 exports.default = ArrayLibrary;
 
 /***/ }),
-/* 3 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -572,278 +816,93 @@ exports.default = ArrayLibrary;
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-/**
- * Created by maksim.bulakhau on 4/19/2017.
- */
-var fs = __webpack_require__(6);
-var cities = __webpack_require__(8);
-var countries = __webpack_require__(9);
-var stores = __webpack_require__(10);
-var streets = __webpack_require__(11);
-var zips = __webpack_require__(12);
-var brands = __webpack_require__(7);
+exports.submitStoresSearch = undefined;
 
-(function initFs(done) {
-    fs.writeFile("cities.json", JSON.stringify(cities)).then(function () {
-        return fs.writeFile("countries.json", JSON.stringify(countries));
-    }).then(function () {
-        return fs.writeFile("stores.json", JSON.stringify(stores));
-    }).then(function () {
-        return fs.writeFile("brands.json", JSON.stringify(brands));
-    }).then(function () {
-        return fs.writeFile("zips.json", JSON.stringify(zips));
-    }).then(function () {
-        return fs.writeFile("streets.json", JSON.stringify(streets));
-    }).then(function () {
-        done;
-    });
-})();
+var _consts = __webpack_require__(0);
 
-var storesService = function () {
-
-    function resolveJson(path, onDone, filters) {
-        return new Promise(function resolver(resolve, reject) {
-            fs.readString(path).then(function (data) {
-                return resolve(onDone(filters, JSON.parse(data)));
-            }, function (error) {
-                return reject(error);
-            });
-
-            /*fs.readString(path, function(error, data) {
-                if (error){
-                    reject(error);
-                }
-                resolve(onDone(filters, JSON.parse(data.toString())));
-            });*/
-        });
-    }
-
-    // This method requires to be pre-binded with first two arguments,
-    // each for property names of filter and readed json correspondinly
-    function getByProp(filterProp, sourceItemProp, filters, sourceArray) {
-        var resultArray = [];
-        filters.forEach(function (filter) {
-            var temp = sourceArray.filter(function (sourceItem) {
-                return filter[filterProp] == sourceItem[sourceItemProp];
-            });
-            temp.forEach(function (filtered) {
-                return resultArray.push(filtered);
-            });
-        });
-        return resultArray;
-    }
-
-    // This method works for occasions, when filter is a string already
-    function getByName(filter, sourceArray) {
-        return sourceArray.filter(function (sourceItem) {
-            return sourceItem.name.search(filter) != -1;
-        });
-    }
-
-    // Public methods for different purposes, which are wrappers on resolveJson calls
-    function getStoresByCity(cityName) {
-        return resolveJson("cities.json", getByName, cityName).then(resolveJson.bind(null, "zips.json", getByProp.bind(null, "name", "city"))).then(resolveJson.bind(null, "stores.json", getByProp.bind(null, "zip", "zip")));
-    }
-
-    function getStoresByCountry(countryName) {
-        return resolveJson("countries.json", getByName, countryName).then(resolveJson.bind(null, "cities.json", getByProp.bind(null, "name", "country"))).then(resolveJson.bind(null, "zips.json", getByProp.bind(null, "name", "city"))).then(resolveJson.bind(null, "stores.json", getByProp.bind(null, "zip", "zip")));
-    }
-
-    function getCitiesByCountry(countryName) {
-        return resolveJson("countries.json", getByName, countryName).then(resolveJson.bind(null, "cities.json", getByProp.bind(null, "name", "country")));
-    }
-
-    function getCountryByCity(cityName) {
-        return resolveJson("cities.json", getByName, cityName).then(resolveJson.bind(null, "countries.json", getByProp.bind(null, "country", "name")));
-    }
-
-    function getTable(path) {
-        return resolveJson(path, getByName, "");
-    }
-
-    return {
-        cities: getTable("cities.json"),
-        countries: getTable("countries.json"),
-        getCitiesByCountry: getCitiesByCountry,
-        getCountryByCity: getCountryByCity,
-        getStoresByCity: getStoresByCity,
-        getStoresByCountry: getStoresByCountry
-    };
-}();
-
-exports.storesService = storesService;
-
-/***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.getSelectedValue = exports.updateCountriesDropdown = exports.updateCitiesDropdown = exports.submitStoresSearch = undefined;
-
-var _storesService = __webpack_require__(3);
-
-var _arraylib = __webpack_require__(2);
+var _arraylib = __webpack_require__(5);
 
 var _arraylib2 = _interopRequireDefault(_arraylib);
+
+var _stores = __webpack_require__(2);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /**
- * Created by maksim.bulakhau on 4/21/2017.
+ * Created by maksim.bulakhau on 4/26/2017.
  */
-(function initPageDropdowns() {
-    initDropdown("selectCountry", _storesService.storesService.countries);
-    initDropdown("selectCity", _storesService.storesService.cities);
-})();
-
-function clearDropdown(dropdownId) {
-    var dropdown = document.getElementById(dropdownId);
-    while (dropdown.options.length > 0) {
-        dropdown.remove(0);
-    }
-}
-
-function initDropdown(dropdownId, dataPromise) {
-    var dropdown = document.getElementById(dropdownId);
-    dropdown.add(new Option("All"));
-    return dataPromise.then(function (dataItems) {
-        dataItems.forEach(function (item) {
-            dropdown.add(new Option(item.name, item.name));
-        });
-    });
-}
-
-function getSelectedValue(dropdownId) {
-    var dropdown = document.getElementById(dropdownId);
-    return dropdown.selectedOptions[0].value;
-}
-
-function setSelectedValue(dropdownId, value) {
-    var dropdown = document.getElementById(dropdownId);
-    var _iteratorNormalCompletion = true;
-    var _didIteratorError = false;
-    var _iteratorError = undefined;
-
-    try {
-        for (var _iterator = dropdown.options[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-            var item = _step.value;
-
-            if (item.value == value) {
-                item.selected = true;
-                break;
-            }
-        }
-    } catch (err) {
-        _didIteratorError = true;
-        _iteratorError = err;
-    } finally {
-        try {
-            if (!_iteratorNormalCompletion && _iterator.return) {
-                _iterator.return();
-            }
-        } finally {
-            if (_didIteratorError) {
-                throw _iteratorError;
-            }
-        }
-    }
-}
-
-function updateCitiesDropdown(countryName) {
-    clearDropdown("selectCity");
-    var selector = countryName == "All" ? _storesService.storesService.cities : _storesService.storesService.getCitiesByCountry(countryName);
-    return initDropdown("selectCity", selector);
-}
-
-function updateCountriesDropdown(cityName) {
-    if (getSelectedValue("selectCountry") != "All") {
-        return;
-    }
-
-    var country = _storesService.storesService.getCountryByCity(cityName);
-    country.then(function (countries) {
-        var countryName = countries[0].name;
-        setSelectedValue("selectCountry", countryName);
-        updateCitiesDropdown(countryName).then(function (done) {
-            return setSelectedValue("selectCity", cityName);
-        });
-    });
-}
+var dataSet;
 
 function getDataSet() {
-    var selectedCity = getSelectedValue("selectCity");
+    var selectedCity = document.getElementById(_consts.citySelectId).value;
     var stores = [];
-    if (selectedCity == "All") {
-        var selectedCountry = getSelectedValue("selectCountry");
-        selectedCountry = selectedCountry == "All" ? "" : selectedCountry;
-        stores = _storesService.storesService.getStoresByCountry(selectedCountry);
+
+    if (selectedCity === _consts.optionAll) {
+        var selectedCountry = document.getElementById(_consts.countrySelectId).value;
+        selectedCountry = selectedCountry === _consts.optionAll ? "" : selectedCountry;
+        stores = _stores.service.getStoresByCountry(selectedCountry);
     } else {
-        stores = _storesService.storesService.getStoresByCity(selectedCity);
+        stores = _stores.service.getStoresByCity(selectedCity);
     }
 
     return stores;
 }
 
-var dataSet;
-var itemsPerPage = 10;
-
 function initStoresTable(data, page) {
 
     // Delete previous table.
-    var div = document.getElementById("resultTableWrapper");
-    while (div.firstChild) {
-        div.removeChild(div.firstChild);
+    var tableWrapperDiv = document.getElementById(_consts.tableContainerId);
+    while (tableWrapperDiv.firstChild) {
+        tableWrapperDiv.removeChild(tableWrapperDiv.firstChild);
     }
 
     // Create table with proper bootstrap classes.
-    var table = document.createElement("table");
-    table.classList.add("table");
-    table.classList.add("table-striped");
-    table.classList.add("table-hover");
+    var storesTable = document.createElement("table");
+    storesTable.classList.add("table", "table-striped", "table-hover");
 
     data.then(function (stores) {
         if (stores.length > 0) {
 
-            var data = _arraylib2.default.chain(stores).skip((page - 1) * itemsPerPage).take(itemsPerPage).value();
+            var _data = _arraylib2.default.chain(stores).skip((page - 1) * _consts.itemsPerPage).take(_consts.itemsPerPage).value();
 
             // Table head init.
             var propNames = Object.getOwnPropertyNames(stores[0]);
             var headRow = document.createElement("tr");
+
             propNames.forEach(function (propName) {
                 var cell = document.createElement("th");
                 var cellText = document.createTextNode(propName);
                 cell.appendChild(cellText);
                 headRow.appendChild(cell);
             });
-            table.appendChild(headRow);
+
+            storesTable.appendChild(headRow);
 
             // Table data init.
-            data.forEach(function (store) {
+            _data.forEach(function (store) {
                 var row = document.createElement("tr");
+
                 propNames.forEach(function (property) {
                     var cell = document.createElement("td");
                     var cellText = document.createTextNode(store[property]);
                     cell.appendChild(cellText);
                     row.appendChild(cell);
                 });
-                table.appendChild(row);
+
+                storesTable.appendChild(row);
             });
         } else {
             var errorMsg = document.createElement("tr");
             errorMsg.innerHTML = "No results found";
-            table.appendChild(errorMsg);
-        }
-        // Enable paging if result set is too big
-        if (stores.length > itemsPerPage) {
-            initPaging((stores.length / itemsPerPage).toFixed(), page);
+            storesTable.appendChild(errorMsg);
         }
 
-        div.appendChild(table);
+        tableWrapperDiv.appendChild(storesTable);
+
+        // Enable paging if result set is too big
+        if (stores.length > _consts.itemsPerPage) {
+            initPaging((stores.length / _consts.itemsPerPage).toFixed(), page);
+        }
     });
 }
 
@@ -857,33 +916,81 @@ function goToPage(pageNum) {
 }
 
 function initPaging(pagesAmount, currentPage) {
-    var div = document.getElementById("resultTableWrapper");
+    var tableContainerDiv = document.getElementById(_consts.tableContainerId);
     var paging = document.createElement("div");
-    paging.classList.add("paging");
+    paging.classList.add(_consts.pagingClass);
 
     for (var i = 1; i <= pagesAmount; i++) {
         var page = document.createElement("a");
         page.setAttribute("href", "#");
         page.innerHTML = i;
-        page.classList.add("page");
+        page.classList.add(_consts.pagingUnitClass);
         page.addEventListener("click", goToPage.bind(null, i));
         if (i == currentPage) {
-            page.classList.add("current-page");
+            page.classList.add(_consts.currentPagingUnitClass);
         }
 
         paging.appendChild(page);
     }
 
-    div.appendChild(paging);
+    tableContainerDiv.appendChild(paging);
 }
 
 exports.submitStoresSearch = submitStoresSearch;
-exports.updateCitiesDropdown = updateCitiesDropdown;
-exports.updateCountriesDropdown = updateCountriesDropdown;
-exports.getSelectedValue = getSelectedValue;
 
 /***/ }),
-/* 5 */
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.dropdowns = exports.submitStoresSearch = undefined;
+
+var _consts = __webpack_require__(0);
+
+var _dropdowns = __webpack_require__(1);
+
+var dropdowns = _interopRequireWildcard(_dropdowns);
+
+var _table = __webpack_require__(6);
+
+var _stores = __webpack_require__(2);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+(function initFs(done) {
+    _consts.fs.writeFile(_consts.citiesKey, JSON.stringify(_consts.cities)).then(function () {
+        return _consts.fs.writeFile(_consts.countriesKey, JSON.stringify(_consts.countries));
+    }).then(function () {
+        return _consts.fs.writeFile(_consts.storesKey, JSON.stringify(_consts.stores));
+    }).then(function () {
+        return _consts.fs.writeFile(_consts.brandsKey, JSON.stringify(_consts.brands));
+    }).then(function () {
+        return _consts.fs.writeFile(_consts.zipsKey, JSON.stringify(_consts.zips));
+    }).then(function () {
+        return _consts.fs.writeFile(_consts.streetsKey, JSON.stringify(_consts.streets));
+    }).then(function () {
+        done;
+    });
+})(); /**
+       * Created by maksim.bulakhau on 4/21/2017.
+       */
+
+
+(function initPageDropdowns() {
+    dropdowns.initDropdown(_consts.countrySelectId, _stores.service.countries);
+    dropdowns.initDropdown(_consts.citySelectId, _stores.service.cities);
+})();
+
+exports.submitStoresSearch = _table.submitStoresSearch;
+exports.dropdowns = dropdowns;
+
+/***/ }),
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -900,9 +1007,9 @@ exports.rmdir = rmdir;
 function _interopRequireDefault(obj) {
     return obj && obj.__esModule ? obj : { 'default': obj };
 }
-var _path = __webpack_require__(1);
+var _path = __webpack_require__(4);
 var _path2 = _interopRequireDefault(_path);
-var _directory_entry = __webpack_require__(0);
+var _directory_entry = __webpack_require__(3);
 var _directory_entry2 = _interopRequireDefault(_directory_entry);
 function ab2str(buf) {
     return String.fromCharCode.apply(null, new Uint16Array(buf));
@@ -1055,7 +1162,7 @@ function rmdir(fullPath) {
 ;
 
 /***/ }),
-/* 6 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1091,8 +1198,8 @@ function _defaults(obj, defaults) {
 function _interopRequireDefault(obj) {
     return obj && obj.__esModule ? obj : { 'default': obj };
 }
-var _core = __webpack_require__(5);
-var _directory_entry = __webpack_require__(0);
+var _core = __webpack_require__(8);
+var _directory_entry = __webpack_require__(3);
 var _directory_entry2 = _interopRequireDefault(_directory_entry);
 _directory_entry2['default'].prototype.readFile = function (callback) {
     if (this.type !== 'file') {
@@ -1104,7 +1211,7 @@ _defaults(exports, _interopRequireWildcard(_core));
 exports.DirectoryEntry = _directory_entry2['default'];
 
 /***/ }),
-/* 7 */
+/* 10 */
 /***/ (function(module, exports) {
 
 module.exports = [
@@ -1180,7 +1287,7 @@ module.exports = [
 ];
 
 /***/ }),
-/* 8 */
+/* 11 */
 /***/ (function(module, exports) {
 
 module.exports = [
@@ -1283,7 +1390,7 @@ module.exports = [
 ];
 
 /***/ }),
-/* 9 */
+/* 12 */
 /***/ (function(module, exports) {
 
 module.exports = [
@@ -2262,7 +2369,7 @@ module.exports = [
 ];
 
 /***/ }),
-/* 10 */
+/* 13 */
 /***/ (function(module, exports) {
 
 module.exports = [
@@ -2544,7 +2651,7 @@ module.exports = [
 ];
 
 /***/ }),
-/* 11 */
+/* 14 */
 /***/ (function(module, exports) {
 
 module.exports = [
@@ -2791,7 +2898,7 @@ module.exports = [
 ];
 
 /***/ }),
-/* 12 */
+/* 15 */
 /***/ (function(module, exports) {
 
 module.exports = [
@@ -2894,7 +3001,7 @@ module.exports = [
 ];
 
 /***/ }),
-/* 13 */
+/* 16 */
 /***/ (function(module, exports) {
 
 // shim for using process in browser

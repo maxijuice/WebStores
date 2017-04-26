@@ -19,19 +19,19 @@
                             <div class="form-group">
                                 <label for="selectCountry" class="col-sm-2 control-label">Country</label>
                                 <div class="col-sm-4">
-                                    <select class="form-control" id="selectCountry" name="Country" onchange="storesInWeb.updateCitiesDropdown(storesInWeb.getSelectedValue('selectCountry'))"></select>
+                                    <select class="form-control" id="selectCountry" name="Country" onchange="webStores.dropdowns.updateCitiesDropdown(this.value)"></select>
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label for="selectCity" class="col-sm-2 control-label">City</label>
                                 <div class="col-sm-4">
-                                    <select class="form-control" id="selectCity" name="City" onchange="storesInWeb.updateCountriesDropdown(storesInWeb.getSelectedValue('selectCity'))"></select>
+                                    <select class="form-control" id="selectCity" name="City" onchange="webStores.dropdowns.updateCountriesDropdown(this.value)"></select>
                                 </div>
                             </div>
                             <div class="form-group">
                                 <div class="col-sm-3 col-sm-offset-9">
                                     <button type="reset" class="btn btn-default">Cancel</button>
-                                    <button type="button" class="btn btn-primary" onclick="storesInWeb.submitStoresSearch()">Submit</button>
+                                    <button type="button" class="btn btn-primary" onclick="webStores.submitStoresSearch()">Submit</button>
                                 </div>
                             </div>
                         </fieldset>

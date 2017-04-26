@@ -4,7 +4,7 @@ module.exports = {
     entry: './src/index.js',
     output: {
         libraryTarget: "var",
-        library: "storesInWeb",
+        library: "webStores",
         filename: './app.bundle.js',
     },
     module: {
