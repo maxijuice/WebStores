@@ -838,12 +838,12 @@ function initStoresTable(data, page) {
             errorMsg.innerHTML = "No results found";
             table.appendChild(errorMsg);
         }
-        div.appendChild(table);
-
         // Enable paging if result set is too big
         if (stores.length > itemsPerPage) {
             initPaging((stores.length / itemsPerPage).toFixed(), page);
         }
+
+        div.appendChild(table);
     });
 }
 

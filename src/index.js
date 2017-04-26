@@ -29,13 +29,13 @@ function initDropdown(dropdownId, dataPromise) {
 
 function getSelectedValue(dropdownId) {
     let dropdown = document.getElementById(dropdownId);
-    return  dropdown.selectedOptions[0].value;
+    return dropdown.selectedOptions[0].value;
 }
 
 function setSelectedValue(dropdownId, value) {
     let dropdown = document.getElementById(dropdownId);
-    for (let item of dropdown.options){
-        if (item.value == value) {
+    for (let item of dropdown.options) {
+        if (item.value === value) {
             item.selected = true;
             break;
         }
@@ -44,29 +44,29 @@ function setSelectedValue(dropdownId, value) {
 
 function updateCitiesDropdown(countryName) {
     clearDropdown("selectCity");
-    let selector = countryName == "All" ? storesService.cities : storesService.getCitiesByCountry(countryName);
+    let selector = countryName === "All" ? storesService.cities : storesService.getCitiesByCountry(countryName);
     return initDropdown("selectCity", selector);
 }
 
 function updateCountriesDropdown(cityName) {
-   if (getSelectedValue("selectCountry") != "All") {
-       return;
-   }
+    if (getSelectedValue("selectCountry") !== "All") {
+        return;
+    }
 
-   let country = storesService.getCountryByCity(cityName);
-   country.then(countries => {
-       let countryName = countries[0].name;
-       setSelectedValue("selectCountry", countryName);
-       updateCitiesDropdown(countryName).then(done => setSelectedValue("selectCity", cityName));
+    let country = storesService.getCountryByCity(cityName);
+    country.then(countries => {
+        let countryName = countries[0].name;
+        setSelectedValue("selectCountry", countryName);
+        updateCitiesDropdown(countryName).then(() => setSelectedValue("selectCity", cityName));
     });
 }
 
 function getDataSet() {
     let selectedCity = getSelectedValue("selectCity");
     let stores = [];
-    if (selectedCity == "All") {
+    if (selectedCity === "All") {
         let selectedCountry = getSelectedValue("selectCountry");
-        selectedCountry = selectedCountry == "All" ? "" : selectedCountry;
+        selectedCountry = selectedCountry === "All" ? "" : selectedCountry;
         stores = storesService.getStoresByCountry(selectedCountry);
     } else {
         stores = storesService.getStoresByCity(selectedCity);
@@ -82,7 +82,7 @@ function initStoresTable(data, page) {
 
     // Delete previous table.
     let div = document.getElementById("resultTableWrapper");
-    while(div.firstChild) {
+    while (div.firstChild) {
         div.removeChild(div.firstChild);
     }
 
@@ -95,7 +95,7 @@ function initStoresTable(data, page) {
     data.then(stores => {
         if (stores.length > 0) {
 
-            var data  = ArrayLibrary.chain(stores).skip((page - 1) * itemsPerPage).take(itemsPerPage).value();
+            let data = ArrayLibrary.chain(stores).skip((page - 1) * itemsPerPage).take(itemsPerPage).value();
 
             // Table head init.
             let propNames = Object.getOwnPropertyNames(stores[0]);
@@ -116,7 +116,7 @@ function initStoresTable(data, page) {
                     let cellText = document.createTextNode(store[property]);
                     cell.appendChild(cellText);
                     row.appendChild(cell);
-                })
+                });
                 table.appendChild(row);
             });
         } else {
@@ -124,12 +124,12 @@ function initStoresTable(data, page) {
             errorMsg.innerHTML = "No results found";
             table.appendChild(errorMsg);
         }
-        div.appendChild(table);
-
         // Enable paging if result set is too big
-        if (stores.length > itemsPerPage){
+        if (stores.length > itemsPerPage) {
             initPaging((stores.length / itemsPerPage).toFixed(), page);
         }
+
+        div.appendChild(table);
     });
 }
 
@@ -153,7 +153,7 @@ function initPaging(pagesAmount, currentPage) {
         page.innerHTML = i;
         page.classList.add("page");
         page.addEventListener("click", goToPage.bind(null, i));
-        if (i == currentPage) {
+        if (i === currentPage) {
             page.classList.add("current-page");
         }
 
@@ -163,4 +163,4 @@ function initPaging(pagesAmount, currentPage) {
     div.appendChild(paging);
 }
 
-export { submitStoresSearch, updateCitiesDropdown, updateCountriesDropdown, getSelectedValue };
+export {submitStoresSearch, updateCitiesDropdown, updateCountriesDropdown, getSelectedValue};

@@ -1,48 +1,39 @@
 /**
  * Created by maksim.bulakhau on 4/19/2017.
  */
-var fs = require("fs-web");
-var cities = require("../data/cities.json");
-var countries = require("../data/countries.json");
-var stores = require("../data/stores.json");
-var streets = require("../data/streets.json");
-var zips = require("../data/zips.json");
-var brands = require("../data/brands.json");
+let fs = require("fs-web");
+let cities = require("../data/cities.json");
+let countries = require("../data/countries.json");
+let stores = require("../data/stores.json");
+let streets = require("../data/streets.json");
+let zips = require("../data/zips.json");
+let brands = require("../data/brands.json");
 
-(function initFs(done) {
+(function initFs() {
     fs.writeFile("cities.json", JSON.stringify(cities))
         .then(() => fs.writeFile("countries.json", JSON.stringify(countries)))
         .then(() => fs.writeFile("stores.json", JSON.stringify(stores)))
         .then(() => fs.writeFile("brands.json", JSON.stringify(brands)))
         .then(() => fs.writeFile("zips.json", JSON.stringify(zips)))
-        .then(() => fs.writeFile("streets.json", JSON.stringify(streets)))
-        .then(() => {done});
+        .then(() => fs.writeFile("streets.json", JSON.stringify(streets)));
 })();
 
-var storesService = (function() {
+var storesService = (function () {
 
     function resolveJson(path, onDone, filters) {
         return new Promise(function resolver(resolve, reject) {
             fs.readString(path)
                 .then(data => resolve(onDone(filters, JSON.parse(data)))
                     , error => reject(error));
-
-            /*fs.readString(path, function(error, data) {
-                if (error){
-                    reject(error);
-                }
-                resolve(onDone(filters, JSON.parse(data.toString())));
-            });*/
-
         });
     }
 
     // This method requires to be pre-binded with first two arguments,
     // each for property names of filter and readed json correspondinly
     function getByProp(filterProp, sourceItemProp, filters, sourceArray) {
-        var resultArray = [];
-        filters.forEach(function(filter) {
-            var temp = sourceArray.filter( sourceItem => filter[filterProp] == sourceItem[sourceItemProp]);
+        let resultArray = [];
+        filters.forEach(function (filter) {
+            let temp = sourceArray.filter(sourceItem => filter[filterProp] === sourceItem[sourceItemProp]);
             temp.forEach(filtered => resultArray.push(filtered));
         });
         return resultArray;
@@ -50,7 +41,7 @@ var storesService = (function() {
 
     // This method works for occasions, when filter is a string already
     function getByName(filter, sourceArray) {
-        return sourceArray.filter(sourceItem => sourceItem.name.search(filter) != -1);
+        return sourceArray.filter(sourceItem => sourceItem.name.search(filter) !== -1);
     }
 
     // Public methods for different purposes, which are wrappers on resolveJson calls

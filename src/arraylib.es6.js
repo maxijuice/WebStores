@@ -6,13 +6,13 @@
  */
 
 /*
-It would be great to add static keyword, which could be applied on classes
-In ES5 that would look like:
+ It would be great to add static keyword, which could be applied on classes
+ In ES5 that would look like:
 
-var StaticClass = function() {};
-StaticClass.prototype = Object.create(null);
-StaticClass.method1 = function() { / native code / };
-*/
+ var StaticClass = function() {};
+ StaticClass.prototype = Object.create(null);
+ StaticClass.method1 = function() { / native code / };
+ */
 "use strict";
 
 export default class ArrayLibrary {
@@ -47,7 +47,7 @@ export default class ArrayLibrary {
             array = array.slice(1);
         }
 
-        for (let item of array){
+        for (let item of array) {
             if (typeof item !== "undefined") {
                 value = callback(value, item);
             }
@@ -78,10 +78,10 @@ export default class ArrayLibrary {
 
     static chain(initArray) {
 
-        var wrapChain = callback => {
+        let wrapChain = callback => {
             callback = callback.bind(null, initArray);
             return (...args) => this.chain(callback.apply(null, args));
-        }
+        };
 
         return {
             take: wrapChain(this.take),
@@ -94,18 +94,18 @@ export default class ArrayLibrary {
     }
 
     static sum(array, start, end) {
-        if (!this.memo){
+        if (!this.memo) {
             this.memo = {};
         }
 
         function summarize(array, start, end, memo) {
-            var property = array + ", " + start + ", " + end;
+            let property = array + ", " + start + ", " + end;
 
             if (property in memo) {
                 return memo[property];
             } else {
-                var resultSum = 0;
-                for(var i = start; i <= end; i++) {
+                let resultSum = 0;
+                for (let i = start; i <= end; i++) {
                     resultSum += array[i];
                 }
                 memo[property] = resultSum;
