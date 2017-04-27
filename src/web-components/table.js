@@ -1,11 +1,11 @@
 /**
  * Created by maksim.bulakhau on 4/26/2017.
  */
-import { itemsPerPage } from "./consts";
+import { itemsPerPage } from "./constants";
 import { citySelectId, countrySelectId, optionAll, 
-    tableContainerId, currentPagingUnitClass, pagingClass, pagingUnitClass } from "./consts";
-import ArrayLibrary from "./arraylib.es6";
-import { service } from "./stores";
+    tableContainerId, currentPagingUnitClass, pagingClass, pagingUnitClass } from "./constants";
+import ArrayLibrary from "../core/arraylib.es6.js";
+import { service } from "../core/stores";
 
 var dataSet;
 
@@ -92,20 +92,21 @@ function goToPage(pageNum) {
 }
 
 function initPaging(pagesAmount, currentPage) {
-    let tableContainerDiv = document.getElementById(tableContainerId);
-    let paging = document.createElement("div");
+    const tableContainerDiv = document.getElementById(tableContainerId);
+    const paging = document.createElement("div");
     paging.classList.add(pagingClass);
 
     for (let i = 1; i <= pagesAmount; i++) {
         let page = document.createElement("a");
+
         page.setAttribute("href", "#");
         page.innerHTML = i;
         page.classList.add(pagingUnitClass);
-        page.addEventListener("click", goToPage.bind(null, i));
         if (i == currentPage) {
             page.classList.add(currentPagingUnitClass);
         }
 
+        page.addEventListener("click", goToPage.bind(null, i));
         paging.appendChild(page);
     }
 

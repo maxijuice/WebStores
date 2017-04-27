@@ -1,11 +1,11 @@
 /**
  * Created by maksim.bulakhau on 4/26/2017.
  */
-import { optionAll, citySelectId, countrySelectId } from "./consts";
-import { service } from "./stores";
+import { optionAll, citySelectId, countrySelectId } from "./constants";
+import { service } from "../core/stores";
 
 function initDropdown(dropdownId, dataPromise) {
-    let dropdown = document.getElementById(dropdownId);
+    const dropdown = document.getElementById(dropdownId);
 
     dropdown.add(new Option(optionAll));
     return dataPromise.then(dataItems => {
@@ -16,7 +16,7 @@ function initDropdown(dropdownId, dataPromise) {
 }
 
 function clearDropdown(dropdownId) {
-    let dropdown = document.getElementById(dropdownId);
+    const dropdown = document.getElementById(dropdownId);
 
     while (dropdown.options.length > 0) {
         dropdown.remove(0);
@@ -24,9 +24,9 @@ function clearDropdown(dropdownId) {
 }
 
 function setSelectedValue(dropdownId, value) {
-    let dropdown = document.getElementById(dropdownId);
+    const dropdown = document.getElementById(dropdownId);
 
-    for (let item of dropdown.options){
+    for (const item of dropdown.options){
         if (item.value == value) {
             item.selected = true;
             break;
@@ -46,7 +46,7 @@ function updateCountriesDropdown(cityName) {
         return;
     }
 
-    let country = service.getCountryByCity(cityName);
+    const country = service.getCountryByCity(cityName);
 
     country.then(countries => {
         const countryName = countries[0].name;

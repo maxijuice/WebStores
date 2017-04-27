@@ -2,11 +2,11 @@
  * Created by maksim.bulakhau on 4/21/2017.
  */
 import { fs, cities, streets, countries, brands, zips, stores,
-    citiesKey, streetsKey, countriesKey, brandsKey, zipsKey, storesKey } from "./consts";
-import { citySelectId, countrySelectId } from "./consts";
-import * as dropdowns from "./dropdowns";
-import { submitStoresSearch } from "./table";
-import { service } from "./stores";
+    citiesKey, streetsKey, countriesKey, brandsKey, zipsKey, storesKey } from "./web-components/constants";
+import { citySelectId, countrySelectId } from "./web-components/constants";
+import * as dropdowns from "./web-components/dropdowns";
+import * as tables from "./web-components/table";
+import { service } from "./core/stores";
 
 (function initFs(done) {
     fs.writeFile(citiesKey, JSON.stringify(cities))
@@ -23,4 +23,4 @@ import { service } from "./stores";
     dropdowns.initDropdown(citySelectId, service.cities);
 })();
 
-export { submitStoresSearch, dropdowns };
+export { tables, dropdowns };

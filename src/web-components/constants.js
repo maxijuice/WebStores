@@ -10,16 +10,17 @@ const pagingUnitClass = "page";
 const currentPagingUnitClass = "current-page";
 const tableContainerId = "resultTableWrapper";
 
-let itemsPerPage = 10;
+// Pagination properties
+const itemsPerPage = 10;
 
 // Require all json files
-const cities = require("../data/cities.json");
-const countries = require("../data/countries.json");
-const stores = require("../data/stores.json");
-const streets = require("../data/streets.json");
-const zips = require("../data/zips.json");
-const brands = require("../data/brands.json");
-let fs = require("fs-web");
+const cities = require("../../data/cities.json");
+const countries = require("../../data/countries.json");
+const stores = require("../../data/stores.json");
+const streets = require("../../data/streets.json");
+const zips = require("../../data/zips.json");
+const brands = require("../../data/brands.json");
+const fs = require("fs-web");
 
 // IndexedDB keys for jsons
 const citiesKey = "cities.json";

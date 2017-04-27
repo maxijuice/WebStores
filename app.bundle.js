@@ -68,251 +68,9 @@ var webStores =
 /******/ })
 /************************************************************************/
 /******/ ([
-/* 0 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-/**
- * Created by maksim.bulakhau on 4/26/2017.
- */
-// HTML ids, classes and string consts
-var optionAll = "All";
-var citySelectId = "selectCity";
-var countrySelectId = "selectCountry";
-var pagingClass = "paging";
-var pagingUnitClass = "page";
-var currentPagingUnitClass = "current-page";
-var tableContainerId = "resultTableWrapper";
-
-var itemsPerPage = 10;
-
-// Require all json files
-var cities = __webpack_require__(11);
-var countries = __webpack_require__(12);
-var stores = __webpack_require__(13);
-var streets = __webpack_require__(14);
-var zips = __webpack_require__(15);
-var brands = __webpack_require__(10);
-var fs = __webpack_require__(9);
-
-// IndexedDB keys for jsons
-var citiesKey = "cities.json";
-var countriesKey = "countries.json";
-var storesKey = "stores.json";
-var streetsKey = "streets.json";
-var zipsKey = "zips.json";
-var brandsKey = "brands.json";
-
-exports.itemsPerPage = itemsPerPage;
-exports.fs = fs;
-exports.cities = cities;
-exports.countries = countries;
-exports.stores = stores;
-exports.streets = streets;
-exports.zips = zips;
-exports.brands = brands;
-exports.optionAll = optionAll;
-exports.citySelectId = citySelectId;
-exports.countrySelectId = countrySelectId;
-exports.citiesKey = citiesKey;
-exports.countriesKey = countriesKey;
-exports.storesKey = storesKey;
-exports.streetsKey = streetsKey;
-exports.zipsKey = zipsKey;
-exports.brandsKey = brandsKey;
-exports.pagingClass = pagingClass;
-exports.pagingUnitClass = pagingUnitClass;
-exports.tableContainerId = tableContainerId;
-exports.currentPagingUnitClass = currentPagingUnitClass;
-
-/***/ }),
-/* 1 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.initDropdown = exports.updateCountriesDropdown = exports.updateCitiesDropdown = undefined;
-
-var _consts = __webpack_require__(0);
-
-var _stores = __webpack_require__(2);
-
-/**
- * Created by maksim.bulakhau on 4/26/2017.
- */
-function initDropdown(dropdownId, dataPromise) {
-    var dropdown = document.getElementById(dropdownId);
-
-    dropdown.add(new Option(_consts.optionAll));
-    return dataPromise.then(function (dataItems) {
-        dataItems.forEach(function (item) {
-            dropdown.add(new Option(item.name, item.name));
-        });
-    });
-}
-
-function clearDropdown(dropdownId) {
-    var dropdown = document.getElementById(dropdownId);
-
-    while (dropdown.options.length > 0) {
-        dropdown.remove(0);
-    }
-}
-
-function setSelectedValue(dropdownId, value) {
-    var dropdown = document.getElementById(dropdownId);
-
-    var _iteratorNormalCompletion = true;
-    var _didIteratorError = false;
-    var _iteratorError = undefined;
-
-    try {
-        for (var _iterator = dropdown.options[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-            var item = _step.value;
-
-            if (item.value == value) {
-                item.selected = true;
-                break;
-            }
-        }
-    } catch (err) {
-        _didIteratorError = true;
-        _iteratorError = err;
-    } finally {
-        try {
-            if (!_iteratorNormalCompletion && _iterator.return) {
-                _iterator.return();
-            }
-        } finally {
-            if (_didIteratorError) {
-                throw _iteratorError;
-            }
-        }
-    }
-}
-
-function updateCitiesDropdown(countryName) {
-    clearDropdown(_consts.citySelectId);
-    var selector = countryName == _consts.optionAll ? _stores.service.cities : _stores.service.getCitiesByCountry(countryName);
-
-    return initDropdown(_consts.citySelectId, selector);
-}
-
-function updateCountriesDropdown(cityName) {
-    if (document.getElementById(_consts.countrySelectId).value != _consts.optionAll) {
-        return;
-    }
-
-    var country = _stores.service.getCountryByCity(cityName);
-
-    country.then(function (countries) {
-        var countryName = countries[0].name;
-        setSelectedValue(_consts.countrySelectId, countryName);
-        updateCitiesDropdown(countryName).then(function (done) {
-            return setSelectedValue(_consts.citySelectId, cityName);
-        });
-    });
-}
-
-exports.updateCitiesDropdown = updateCitiesDropdown;
-exports.updateCountriesDropdown = updateCountriesDropdown;
-exports.initDropdown = initDropdown;
-
-/***/ }),
+/* 0 */,
+/* 1 */,
 /* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.service = undefined;
-
-var _consts = __webpack_require__(0);
-
-var service = function () {
-
-    function resolveJson(path, onDone, filters) {
-        return new Promise(function resolver(resolve, reject) {
-            _consts.fs.readString(path).then(function (data) {
-                return resolve(onDone(filters, JSON.parse(data)));
-            }, function (error) {
-                return reject(error);
-            });
-        });
-    }
-
-    // This method requires to be pre-binded with first two arguments,
-    // each for property names of filter and readed json correspondinly
-    function getByProp(filterProp, sourceItemProp, filters, sourceArray) {
-        var resultArray = [];
-
-        filters.forEach(function (filter) {
-            var temp = sourceArray.filter(function (sourceItem) {
-                return filter[filterProp] == sourceItem[sourceItemProp];
-            });
-            temp.forEach(function (filtered) {
-                return resultArray.push(filtered);
-            });
-        });
-
-        return resultArray;
-    }
-
-    // This method works for occasions, when filter is a string already
-    function getByName(filter, sourceArray) {
-        return sourceArray.filter(function (sourceItem) {
-            return sourceItem.name.search(filter) != -1;
-        });
-    }
-
-    // Public methods for different purposes, which are wrappers on resolveJson calls
-    function getStoresByCity(cityName) {
-        return resolveJson(_consts.citiesKey, getByName, cityName).then(resolveJson.bind(null, _consts.zipsKey, getByProp.bind(null, "name", "city"))).then(resolveJson.bind(null, _consts.storesKey, getByProp.bind(null, "zip", "zip")));
-    }
-
-    function getStoresByCountry(countryName) {
-        return resolveJson(_consts.countriesKey, getByName, countryName).then(resolveJson.bind(null, _consts.citiesKey, getByProp.bind(null, "name", "country"))).then(resolveJson.bind(null, _consts.zipsKey, getByProp.bind(null, "name", "city"))).then(resolveJson.bind(null, _consts.storesKey, getByProp.bind(null, "zip", "zip")));
-    }
-
-    function getCitiesByCountry(countryName) {
-        return resolveJson(_consts.countriesKey, getByName, countryName).then(resolveJson.bind(null, _consts.citiesKey, getByProp.bind(null, "name", "country")));
-    }
-
-    function getCountryByCity(cityName) {
-        return resolveJson(_consts.citiesKey, getByName, cityName).then(resolveJson.bind(null, _consts.countriesKey, getByProp.bind(null, "country", "name")));
-    }
-
-    function getTable(path) {
-        return resolveJson(path, getByName, "");
-    }
-
-    return {
-        cities: getTable(_consts.citiesKey),
-        countries: getTable(_consts.countriesKey),
-        getCitiesByCountry: getCitiesByCountry,
-        getCountryByCity: getCountryByCity,
-        getStoresByCity: getStoresByCity,
-        getStoresByCountry: getStoresByCountry
-    };
-}(); /**
-      * Created by maksim.bulakhau on 4/19/2017.
-      */
-exports.service = service;
-
-/***/ }),
-/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -322,7 +80,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 function _interopRequireDefault(obj) {
     return obj && obj.__esModule ? obj : { 'default': obj };
 }
-var _path = __webpack_require__(4);
+var _path = __webpack_require__(3);
 var _path2 = _interopRequireDefault(_path);
 function DirectoryEntry(fullPath, type) {
     this.path = fullPath;
@@ -334,7 +92,7 @@ exports['default'] = DirectoryEntry;
 module.exports = exports['default'];
 
 /***/ }),
-/* 4 */
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(process) {// Copyright Joyent, Inc. and other Node contributors.
@@ -565,380 +323,9 @@ var substr = 'ab'.substr(-1) === 'b'
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(16)))
 
 /***/ }),
-/* 5 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/**
- * Created by maksim.bulakhau on 3/27/2017.
- */
-/*
- Array Library object for operating on arrays
- */
-
-/*
- It would be great to add static keyword, which could be applied on classes
- In ES5 that would look like:
-
- var StaticClass = function() {};
- StaticClass.prototype = Object.create(null);
- StaticClass.method1 = function() { / native code / };
- */
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var ArrayLibrary = function () {
-    function ArrayLibrary() {
-        _classCallCheck(this, ArrayLibrary);
-    }
-
-    _createClass(ArrayLibrary, null, [{
-        key: "take",
-        value: function take(array, n) {
-            return array.slice(0, n);
-        }
-    }, {
-        key: "skip",
-        value: function skip(array, n) {
-            return array.slice(n);
-        }
-    }, {
-        key: "map",
-        value: function map(array, callback) {
-            var newArray = [];
-
-            var _iteratorNormalCompletion = true;
-            var _didIteratorError = false;
-            var _iteratorError = undefined;
-
-            try {
-                for (var _iterator = array[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                    var item = _step.value;
-
-                    if (typeof item !== "undefined") {
-                        newArray.push(callback(item));
-                    }
-                }
-            } catch (err) {
-                _didIteratorError = true;
-                _iteratorError = err;
-            } finally {
-                try {
-                    if (!_iteratorNormalCompletion && _iterator.return) {
-                        _iterator.return();
-                    }
-                } finally {
-                    if (_didIteratorError) {
-                        throw _iteratorError;
-                    }
-                }
-            }
-
-            return newArray;
-        }
-    }, {
-        key: "reduce",
-        value: function reduce(array, callback) {
-            var value = 0;
-
-            if ((arguments.length <= 2 ? 0 : arguments.length - 2) > 0) {
-                value = arguments.length <= 2 ? undefined : arguments[2];
-            } else {
-                value = array[0];
-                array = array.slice(1);
-            }
-
-            var _iteratorNormalCompletion2 = true;
-            var _didIteratorError2 = false;
-            var _iteratorError2 = undefined;
-
-            try {
-                for (var _iterator2 = array[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-                    var item = _step2.value;
-
-                    if (typeof item !== "undefined") {
-                        value = callback(value, item);
-                    }
-                }
-            } catch (err) {
-                _didIteratorError2 = true;
-                _iteratorError2 = err;
-            } finally {
-                try {
-                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
-                        _iterator2.return();
-                    }
-                } finally {
-                    if (_didIteratorError2) {
-                        throw _iteratorError2;
-                    }
-                }
-            }
-
-            return value;
-        }
-    }, {
-        key: "foreach",
-        value: function foreach(array, callback) {
-            var _iteratorNormalCompletion3 = true;
-            var _didIteratorError3 = false;
-            var _iteratorError3 = undefined;
-
-            try {
-                for (var _iterator3 = array[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-                    var item = _step3.value;
-
-                    if (typeof item !== "undefined") {
-                        callback(item, array.indexOf(item), array);
-                    }
-                }
-            } catch (err) {
-                _didIteratorError3 = true;
-                _iteratorError3 = err;
-            } finally {
-                try {
-                    if (!_iteratorNormalCompletion3 && _iterator3.return) {
-                        _iterator3.return();
-                    }
-                } finally {
-                    if (_didIteratorError3) {
-                        throw _iteratorError3;
-                    }
-                }
-            }
-        }
-    }, {
-        key: "filter",
-        value: function filter(array, callback) {
-            var newArray = [];
-
-            var _iteratorNormalCompletion4 = true;
-            var _didIteratorError4 = false;
-            var _iteratorError4 = undefined;
-
-            try {
-                for (var _iterator4 = array[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-                    var item = _step4.value;
-
-                    if (callback(item, array.indexOf(item), array)) {
-                        newArray.push(item);
-                    }
-                }
-            } catch (err) {
-                _didIteratorError4 = true;
-                _iteratorError4 = err;
-            } finally {
-                try {
-                    if (!_iteratorNormalCompletion4 && _iterator4.return) {
-                        _iterator4.return();
-                    }
-                } finally {
-                    if (_didIteratorError4) {
-                        throw _iteratorError4;
-                    }
-                }
-            }
-
-            return newArray;
-        }
-    }, {
-        key: "chain",
-        value: function chain(initArray) {
-            var _this = this;
-
-            var wrapChain = function wrapChain(callback) {
-                callback = callback.bind(null, initArray);
-                return function () {
-                    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-                        args[_key] = arguments[_key];
-                    }
-
-                    return _this.chain(callback.apply(null, args));
-                };
-            };
-
-            return {
-                take: wrapChain(this.take),
-                skip: wrapChain(this.skip),
-                map: wrapChain(this.map),
-                foreach: wrapChain(this.foreach),
-                filter: wrapChain(this.filter),
-                value: function value() {
-                    return initArray;
-                }
-            };
-        }
-    }, {
-        key: "sum",
-        value: function sum(array, start, end) {
-            if (!this.memo) {
-                this.memo = {};
-            }
-
-            function summarize(array, start, end, memo) {
-                var property = array + ", " + start + ", " + end;
-
-                if (property in memo) {
-                    return memo[property];
-                } else {
-                    var resultSum = 0;
-                    for (var i = start; i <= end; i++) {
-                        resultSum += array[i];
-                    }
-                    memo[property] = resultSum;
-                    return resultSum;
-                }
-            }
-
-            return summarize(array, start, end, this.memo);
-        }
-    }]);
-
-    return ArrayLibrary;
-}();
-
-exports.default = ArrayLibrary;
-
-/***/ }),
-/* 6 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.submitStoresSearch = undefined;
-
-var _consts = __webpack_require__(0);
-
-var _arraylib = __webpack_require__(5);
-
-var _arraylib2 = _interopRequireDefault(_arraylib);
-
-var _stores = __webpack_require__(2);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * Created by maksim.bulakhau on 4/26/2017.
- */
-var dataSet;
-
-function getDataSet() {
-    var selectedCity = document.getElementById(_consts.citySelectId).value;
-    var stores = [];
-
-    if (selectedCity === _consts.optionAll) {
-        var selectedCountry = document.getElementById(_consts.countrySelectId).value;
-        selectedCountry = selectedCountry === _consts.optionAll ? "" : selectedCountry;
-        stores = _stores.service.getStoresByCountry(selectedCountry);
-    } else {
-        stores = _stores.service.getStoresByCity(selectedCity);
-    }
-
-    return stores;
-}
-
-function initStoresTable(data, page) {
-
-    // Delete previous table.
-    var tableWrapperDiv = document.getElementById(_consts.tableContainerId);
-    while (tableWrapperDiv.firstChild) {
-        tableWrapperDiv.removeChild(tableWrapperDiv.firstChild);
-    }
-
-    // Create table with proper bootstrap classes.
-    var storesTable = document.createElement("table");
-    storesTable.classList.add("table", "table-striped", "table-hover");
-
-    data.then(function (stores) {
-        if (stores.length > 0) {
-
-            var _data = _arraylib2.default.chain(stores).skip((page - 1) * _consts.itemsPerPage).take(_consts.itemsPerPage).value();
-
-            // Table head init.
-            var propNames = Object.getOwnPropertyNames(stores[0]);
-            var headRow = document.createElement("tr");
-
-            propNames.forEach(function (propName) {
-                var cell = document.createElement("th");
-                var cellText = document.createTextNode(propName);
-                cell.appendChild(cellText);
-                headRow.appendChild(cell);
-            });
-
-            storesTable.appendChild(headRow);
-
-            // Table data init.
-            _data.forEach(function (store) {
-                var row = document.createElement("tr");
-
-                propNames.forEach(function (property) {
-                    var cell = document.createElement("td");
-                    var cellText = document.createTextNode(store[property]);
-                    cell.appendChild(cellText);
-                    row.appendChild(cell);
-                });
-
-                storesTable.appendChild(row);
-            });
-        } else {
-            var errorMsg = document.createElement("tr");
-            errorMsg.innerHTML = "No results found";
-            storesTable.appendChild(errorMsg);
-        }
-
-        tableWrapperDiv.appendChild(storesTable);
-
-        // Enable paging if result set is too big
-        if (stores.length > _consts.itemsPerPage) {
-            initPaging((stores.length / _consts.itemsPerPage).toFixed(), page);
-        }
-    });
-}
-
-function submitStoresSearch() {
-    dataSet = getDataSet();
-    initStoresTable(dataSet, 1);
-}
-
-function goToPage(pageNum) {
-    initStoresTable(dataSet, pageNum);
-}
-
-function initPaging(pagesAmount, currentPage) {
-    var tableContainerDiv = document.getElementById(_consts.tableContainerId);
-    var paging = document.createElement("div");
-    paging.classList.add(_consts.pagingClass);
-
-    for (var i = 1; i <= pagesAmount; i++) {
-        var page = document.createElement("a");
-        page.setAttribute("href", "#");
-        page.innerHTML = i;
-        page.classList.add(_consts.pagingUnitClass);
-        page.addEventListener("click", goToPage.bind(null, i));
-        if (i == currentPage) {
-            page.classList.add(_consts.currentPagingUnitClass);
-        }
-
-        paging.appendChild(page);
-    }
-
-    tableContainerDiv.appendChild(paging);
-}
-
-exports.submitStoresSearch = submitStoresSearch;
-
-/***/ }),
+/* 4 */,
+/* 5 */,
+/* 6 */,
 /* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -948,31 +335,33 @@ exports.submitStoresSearch = submitStoresSearch;
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.dropdowns = exports.submitStoresSearch = undefined;
+exports.dropdowns = exports.tables = undefined;
 
-var _consts = __webpack_require__(0);
+var _constants = __webpack_require__(20);
 
-var _dropdowns = __webpack_require__(1);
+var _dropdowns = __webpack_require__(21);
 
 var dropdowns = _interopRequireWildcard(_dropdowns);
 
-var _table = __webpack_require__(6);
+var _table = __webpack_require__(22);
 
-var _stores = __webpack_require__(2);
+var tables = _interopRequireWildcard(_table);
+
+var _stores = __webpack_require__(18);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 (function initFs(done) {
-    _consts.fs.writeFile(_consts.citiesKey, JSON.stringify(_consts.cities)).then(function () {
-        return _consts.fs.writeFile(_consts.countriesKey, JSON.stringify(_consts.countries));
+    _constants.fs.writeFile(_constants.citiesKey, JSON.stringify(_constants.cities)).then(function () {
+        return _constants.fs.writeFile(_constants.countriesKey, JSON.stringify(_constants.countries));
     }).then(function () {
-        return _consts.fs.writeFile(_consts.storesKey, JSON.stringify(_consts.stores));
+        return _constants.fs.writeFile(_constants.storesKey, JSON.stringify(_constants.stores));
     }).then(function () {
-        return _consts.fs.writeFile(_consts.brandsKey, JSON.stringify(_consts.brands));
+        return _constants.fs.writeFile(_constants.brandsKey, JSON.stringify(_constants.brands));
     }).then(function () {
-        return _consts.fs.writeFile(_consts.zipsKey, JSON.stringify(_consts.zips));
+        return _constants.fs.writeFile(_constants.zipsKey, JSON.stringify(_constants.zips));
     }).then(function () {
-        return _consts.fs.writeFile(_consts.streetsKey, JSON.stringify(_consts.streets));
+        return _constants.fs.writeFile(_constants.streetsKey, JSON.stringify(_constants.streets));
     }).then(function () {
         done;
     });
@@ -982,11 +371,11 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 
 (function initPageDropdowns() {
-    dropdowns.initDropdown(_consts.countrySelectId, _stores.service.countries);
-    dropdowns.initDropdown(_consts.citySelectId, _stores.service.cities);
+    dropdowns.initDropdown(_constants.countrySelectId, _stores.service.countries);
+    dropdowns.initDropdown(_constants.citySelectId, _stores.service.cities);
 })();
 
-exports.submitStoresSearch = _table.submitStoresSearch;
+exports.tables = tables;
 exports.dropdowns = dropdowns;
 
 /***/ }),
@@ -1007,9 +396,9 @@ exports.rmdir = rmdir;
 function _interopRequireDefault(obj) {
     return obj && obj.__esModule ? obj : { 'default': obj };
 }
-var _path = __webpack_require__(4);
+var _path = __webpack_require__(3);
 var _path2 = _interopRequireDefault(_path);
-var _directory_entry = __webpack_require__(3);
+var _directory_entry = __webpack_require__(2);
 var _directory_entry2 = _interopRequireDefault(_directory_entry);
 function ab2str(buf) {
     return String.fromCharCode.apply(null, new Uint16Array(buf));
@@ -1199,7 +588,7 @@ function _interopRequireDefault(obj) {
     return obj && obj.__esModule ? obj : { 'default': obj };
 }
 var _core = __webpack_require__(8);
-var _directory_entry = __webpack_require__(3);
+var _directory_entry = __webpack_require__(2);
 var _directory_entry2 = _interopRequireDefault(_directory_entry);
 _directory_entry2['default'].prototype.readFile = function (callback) {
     if (this.type !== 'file') {
@@ -3185,6 +2574,627 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
+
+/***/ }),
+/* 17 */,
+/* 18 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.service = undefined;
+
+var _constants = __webpack_require__(20);
+
+var service = function () {
+
+    function resolveJson(path, onDone, filters) {
+        return new Promise(function resolver(resolve, reject) {
+            _constants.fs.readString(path).then(function (data) {
+                return resolve(onDone(filters, JSON.parse(data)));
+            }, function (error) {
+                return reject(error);
+            });
+        });
+    }
+
+    // This method requires to be pre-binded with first two arguments,
+    // each for property names of filter and readed json correspondinly
+    function getByProp(filterProp, sourceItemProp, filters, sourceArray) {
+        var resultArray = [];
+
+        filters.forEach(function (filter) {
+            var temp = sourceArray.filter(function (sourceItem) {
+                return filter[filterProp] == sourceItem[sourceItemProp];
+            });
+            temp.forEach(function (filtered) {
+                return resultArray.push(filtered);
+            });
+        });
+
+        return resultArray;
+    }
+
+    // This method works for occasions, when filter is a string already
+    function getByName(filter, sourceArray) {
+        return sourceArray.filter(function (sourceItem) {
+            return sourceItem.name.search(filter) != -1;
+        });
+    }
+
+    // Public methods for different purposes, which are wrappers on resolveJson calls
+    function getStoresByCity(cityName) {
+        return resolveJson(_constants.citiesKey, getByName, cityName).then(resolveJson.bind(null, _constants.zipsKey, getByProp.bind(null, "name", "city"))).then(resolveJson.bind(null, _constants.storesKey, getByProp.bind(null, "zip", "zip")));
+    }
+
+    function getStoresByCountry(countryName) {
+        return resolveJson(_constants.countriesKey, getByName, countryName).then(resolveJson.bind(null, _constants.citiesKey, getByProp.bind(null, "name", "country"))).then(resolveJson.bind(null, _constants.zipsKey, getByProp.bind(null, "name", "city"))).then(resolveJson.bind(null, _constants.storesKey, getByProp.bind(null, "zip", "zip")));
+    }
+
+    function getCitiesByCountry(countryName) {
+        return resolveJson(_constants.countriesKey, getByName, countryName).then(resolveJson.bind(null, _constants.citiesKey, getByProp.bind(null, "name", "country")));
+    }
+
+    function getCountryByCity(cityName) {
+        return resolveJson(_constants.citiesKey, getByName, cityName).then(resolveJson.bind(null, _constants.countriesKey, getByProp.bind(null, "country", "name")));
+    }
+
+    function getTable(path) {
+        return resolveJson(path, getByName, "");
+    }
+
+    return {
+        cities: getTable(_constants.citiesKey),
+        countries: getTable(_constants.countriesKey),
+        getCitiesByCountry: getCitiesByCountry,
+        getCountryByCity: getCountryByCity,
+        getStoresByCity: getStoresByCity,
+        getStoresByCountry: getStoresByCountry
+    };
+}(); /**
+      * Created by maksim.bulakhau on 4/19/2017.
+      */
+exports.service = service;
+
+/***/ }),
+/* 19 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/**
+ * Created by maksim.bulakhau on 3/27/2017.
+ */
+/*
+ Array Library object for operating on arrays
+ */
+
+/*
+ It would be great to add static keyword, which could be applied on classes
+ In ES5 that would look like:
+
+ var StaticClass = function() {};
+ StaticClass.prototype = Object.create(null);
+ StaticClass.method1 = function() { / native code / };
+ */
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var ArrayLibrary = function () {
+    function ArrayLibrary() {
+        _classCallCheck(this, ArrayLibrary);
+    }
+
+    _createClass(ArrayLibrary, null, [{
+        key: "take",
+        value: function take(array, n) {
+            return array.slice(0, n);
+        }
+    }, {
+        key: "skip",
+        value: function skip(array, n) {
+            return array.slice(n);
+        }
+    }, {
+        key: "map",
+        value: function map(array, callback) {
+            var newArray = [];
+
+            var _iteratorNormalCompletion = true;
+            var _didIteratorError = false;
+            var _iteratorError = undefined;
+
+            try {
+                for (var _iterator = array[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                    var item = _step.value;
+
+                    if (typeof item !== "undefined") {
+                        newArray.push(callback(item));
+                    }
+                }
+            } catch (err) {
+                _didIteratorError = true;
+                _iteratorError = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion && _iterator.return) {
+                        _iterator.return();
+                    }
+                } finally {
+                    if (_didIteratorError) {
+                        throw _iteratorError;
+                    }
+                }
+            }
+
+            return newArray;
+        }
+    }, {
+        key: "reduce",
+        value: function reduce(array, callback) {
+            var value = 0;
+
+            if ((arguments.length <= 2 ? 0 : arguments.length - 2) > 0) {
+                value = arguments.length <= 2 ? undefined : arguments[2];
+            } else {
+                value = array[0];
+                array = array.slice(1);
+            }
+
+            var _iteratorNormalCompletion2 = true;
+            var _didIteratorError2 = false;
+            var _iteratorError2 = undefined;
+
+            try {
+                for (var _iterator2 = array[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                    var item = _step2.value;
+
+                    if (typeof item !== "undefined") {
+                        value = callback(value, item);
+                    }
+                }
+            } catch (err) {
+                _didIteratorError2 = true;
+                _iteratorError2 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                        _iterator2.return();
+                    }
+                } finally {
+                    if (_didIteratorError2) {
+                        throw _iteratorError2;
+                    }
+                }
+            }
+
+            return value;
+        }
+    }, {
+        key: "foreach",
+        value: function foreach(array, callback) {
+            var _iteratorNormalCompletion3 = true;
+            var _didIteratorError3 = false;
+            var _iteratorError3 = undefined;
+
+            try {
+                for (var _iterator3 = array[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+                    var item = _step3.value;
+
+                    if (typeof item !== "undefined") {
+                        callback(item, array.indexOf(item), array);
+                    }
+                }
+            } catch (err) {
+                _didIteratorError3 = true;
+                _iteratorError3 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion3 && _iterator3.return) {
+                        _iterator3.return();
+                    }
+                } finally {
+                    if (_didIteratorError3) {
+                        throw _iteratorError3;
+                    }
+                }
+            }
+        }
+    }, {
+        key: "filter",
+        value: function filter(array, callback) {
+            var newArray = [];
+
+            var _iteratorNormalCompletion4 = true;
+            var _didIteratorError4 = false;
+            var _iteratorError4 = undefined;
+
+            try {
+                for (var _iterator4 = array[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+                    var item = _step4.value;
+
+                    if (callback(item, array.indexOf(item), array)) {
+                        newArray.push(item);
+                    }
+                }
+            } catch (err) {
+                _didIteratorError4 = true;
+                _iteratorError4 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion4 && _iterator4.return) {
+                        _iterator4.return();
+                    }
+                } finally {
+                    if (_didIteratorError4) {
+                        throw _iteratorError4;
+                    }
+                }
+            }
+
+            return newArray;
+        }
+    }, {
+        key: "chain",
+        value: function chain(initArray) {
+            var _this = this;
+
+            var wrapChain = function wrapChain(callback) {
+                callback = callback.bind(null, initArray);
+                return function () {
+                    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+                        args[_key] = arguments[_key];
+                    }
+
+                    return _this.chain(callback.apply(null, args));
+                };
+            };
+
+            return {
+                take: wrapChain(this.take),
+                skip: wrapChain(this.skip),
+                map: wrapChain(this.map),
+                foreach: wrapChain(this.foreach),
+                filter: wrapChain(this.filter),
+                value: function value() {
+                    return initArray;
+                }
+            };
+        }
+    }, {
+        key: "sum",
+        value: function sum(array, start, end) {
+            if (!this.memo) {
+                this.memo = {};
+            }
+
+            function summarize(array, start, end, memo) {
+                var property = array + ", " + start + ", " + end;
+
+                if (property in memo) {
+                    return memo[property];
+                } else {
+                    var resultSum = 0;
+                    for (var i = start; i <= end; i++) {
+                        resultSum += array[i];
+                    }
+                    memo[property] = resultSum;
+                    return resultSum;
+                }
+            }
+
+            return summarize(array, start, end, this.memo);
+        }
+    }]);
+
+    return ArrayLibrary;
+}();
+
+exports.default = ArrayLibrary;
+
+/***/ }),
+/* 20 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+/**
+ * Created by maksim.bulakhau on 4/26/2017.
+ */
+// HTML ids, classes and string consts
+var optionAll = "All";
+var citySelectId = "selectCity";
+var countrySelectId = "selectCountry";
+var pagingClass = "paging";
+var pagingUnitClass = "page";
+var currentPagingUnitClass = "current-page";
+var tableContainerId = "resultTableWrapper";
+
+// Pagination properties
+var itemsPerPage = 10;
+
+// Require all json files
+var cities = __webpack_require__(11);
+var countries = __webpack_require__(12);
+var stores = __webpack_require__(13);
+var streets = __webpack_require__(14);
+var zips = __webpack_require__(15);
+var brands = __webpack_require__(10);
+var fs = __webpack_require__(9);
+
+// IndexedDB keys for jsons
+var citiesKey = "cities.json";
+var countriesKey = "countries.json";
+var storesKey = "stores.json";
+var streetsKey = "streets.json";
+var zipsKey = "zips.json";
+var brandsKey = "brands.json";
+
+exports.itemsPerPage = itemsPerPage;
+exports.fs = fs;
+exports.cities = cities;
+exports.countries = countries;
+exports.stores = stores;
+exports.streets = streets;
+exports.zips = zips;
+exports.brands = brands;
+exports.optionAll = optionAll;
+exports.citySelectId = citySelectId;
+exports.countrySelectId = countrySelectId;
+exports.citiesKey = citiesKey;
+exports.countriesKey = countriesKey;
+exports.storesKey = storesKey;
+exports.streetsKey = streetsKey;
+exports.zipsKey = zipsKey;
+exports.brandsKey = brandsKey;
+exports.pagingClass = pagingClass;
+exports.pagingUnitClass = pagingUnitClass;
+exports.tableContainerId = tableContainerId;
+exports.currentPagingUnitClass = currentPagingUnitClass;
+
+/***/ }),
+/* 21 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.initDropdown = exports.updateCountriesDropdown = exports.updateCitiesDropdown = undefined;
+
+var _constants = __webpack_require__(20);
+
+var _stores = __webpack_require__(18);
+
+/**
+ * Created by maksim.bulakhau on 4/26/2017.
+ */
+function initDropdown(dropdownId, dataPromise) {
+    var dropdown = document.getElementById(dropdownId);
+
+    dropdown.add(new Option(_constants.optionAll));
+    return dataPromise.then(function (dataItems) {
+        dataItems.forEach(function (item) {
+            dropdown.add(new Option(item.name, item.name));
+        });
+    });
+}
+
+function clearDropdown(dropdownId) {
+    var dropdown = document.getElementById(dropdownId);
+
+    while (dropdown.options.length > 0) {
+        dropdown.remove(0);
+    }
+}
+
+function setSelectedValue(dropdownId, value) {
+    var dropdown = document.getElementById(dropdownId);
+
+    var _iteratorNormalCompletion = true;
+    var _didIteratorError = false;
+    var _iteratorError = undefined;
+
+    try {
+        for (var _iterator = dropdown.options[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+            var item = _step.value;
+
+            if (item.value == value) {
+                item.selected = true;
+                break;
+            }
+        }
+    } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+    } finally {
+        try {
+            if (!_iteratorNormalCompletion && _iterator.return) {
+                _iterator.return();
+            }
+        } finally {
+            if (_didIteratorError) {
+                throw _iteratorError;
+            }
+        }
+    }
+}
+
+function updateCitiesDropdown(countryName) {
+    clearDropdown(_constants.citySelectId);
+    var selector = countryName == _constants.optionAll ? _stores.service.cities : _stores.service.getCitiesByCountry(countryName);
+
+    return initDropdown(_constants.citySelectId, selector);
+}
+
+function updateCountriesDropdown(cityName) {
+    if (document.getElementById(_constants.countrySelectId).value != _constants.optionAll) {
+        return;
+    }
+
+    var country = _stores.service.getCountryByCity(cityName);
+
+    country.then(function (countries) {
+        var countryName = countries[0].name;
+        setSelectedValue(_constants.countrySelectId, countryName);
+        updateCitiesDropdown(countryName).then(function (done) {
+            return setSelectedValue(_constants.citySelectId, cityName);
+        });
+    });
+}
+
+exports.updateCitiesDropdown = updateCitiesDropdown;
+exports.updateCountriesDropdown = updateCountriesDropdown;
+exports.initDropdown = initDropdown;
+
+/***/ }),
+/* 22 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.submitStoresSearch = undefined;
+
+var _constants = __webpack_require__(20);
+
+var _arraylibEs = __webpack_require__(19);
+
+var _arraylibEs2 = _interopRequireDefault(_arraylibEs);
+
+var _stores = __webpack_require__(18);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * Created by maksim.bulakhau on 4/26/2017.
+ */
+var dataSet;
+
+function getDataSet() {
+    var selectedCity = document.getElementById(_constants.citySelectId).value;
+    var stores = [];
+
+    if (selectedCity === _constants.optionAll) {
+        var selectedCountry = document.getElementById(_constants.countrySelectId).value;
+        selectedCountry = selectedCountry === _constants.optionAll ? "" : selectedCountry;
+        stores = _stores.service.getStoresByCountry(selectedCountry);
+    } else {
+        stores = _stores.service.getStoresByCity(selectedCity);
+    }
+
+    return stores;
+}
+
+function initStoresTable(data, page) {
+
+    // Delete previous table.
+    var tableWrapperDiv = document.getElementById(_constants.tableContainerId);
+    while (tableWrapperDiv.firstChild) {
+        tableWrapperDiv.removeChild(tableWrapperDiv.firstChild);
+    }
+
+    // Create table with proper bootstrap classes.
+    var storesTable = document.createElement("table");
+    storesTable.classList.add("table", "table-striped", "table-hover");
+
+    data.then(function (stores) {
+        if (stores.length > 0) {
+
+            var _data = _arraylibEs2.default.chain(stores).skip((page - 1) * _constants.itemsPerPage).take(_constants.itemsPerPage).value();
+
+            // Table head init.
+            var propNames = Object.getOwnPropertyNames(stores[0]);
+            var headRow = document.createElement("tr");
+
+            propNames.forEach(function (propName) {
+                var cell = document.createElement("th");
+                var cellText = document.createTextNode(propName);
+                cell.appendChild(cellText);
+                headRow.appendChild(cell);
+            });
+
+            storesTable.appendChild(headRow);
+
+            // Table data init.
+            _data.forEach(function (store) {
+                var row = document.createElement("tr");
+
+                propNames.forEach(function (property) {
+                    var cell = document.createElement("td");
+                    var cellText = document.createTextNode(store[property]);
+                    cell.appendChild(cellText);
+                    row.appendChild(cell);
+                });
+
+                storesTable.appendChild(row);
+            });
+        } else {
+            var errorMsg = document.createElement("tr");
+            errorMsg.innerHTML = "No results found";
+            storesTable.appendChild(errorMsg);
+        }
+
+        tableWrapperDiv.appendChild(storesTable);
+
+        // Enable paging if result set is too big
+        if (stores.length > _constants.itemsPerPage) {
+            initPaging((stores.length / _constants.itemsPerPage).toFixed(), page);
+        }
+    });
+}
+
+function submitStoresSearch() {
+    dataSet = getDataSet();
+    initStoresTable(dataSet, 1);
+}
+
+function goToPage(pageNum) {
+    initStoresTable(dataSet, pageNum);
+}
+
+function initPaging(pagesAmount, currentPage) {
+    var tableContainerDiv = document.getElementById(_constants.tableContainerId);
+    var paging = document.createElement("div");
+    paging.classList.add(_constants.pagingClass);
+
+    for (var i = 1; i <= pagesAmount; i++) {
+        var page = document.createElement("a");
+
+        page.setAttribute("href", "#");
+        page.innerHTML = i;
+        page.classList.add(_constants.pagingUnitClass);
+        if (i == currentPage) {
+            page.classList.add(_constants.currentPagingUnitClass);
+        }
+
+        page.addEventListener("click", goToPage.bind(null, i));
+        paging.appendChild(page);
+    }
+
+    tableContainerDiv.appendChild(paging);
+}
+
+exports.submitStoresSearch = submitStoresSearch;
 
 /***/ })
 /******/ ]);

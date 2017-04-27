@@ -1,7 +1,7 @@
 /**
  * Created by maksim.bulakhau on 4/19/2017.
  */
-import { fs, citiesKey, brandsKey, streetsKey, countriesKey, zipsKey, storesKey } from "./consts";
+import { fs, citiesKey, brandsKey, streetsKey, countriesKey, zipsKey, storesKey } from "../web-components/constants";
 
 let service = (function() {
 
